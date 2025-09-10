@@ -1,15 +1,14 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 34
     defaultConfig {
         applicationId "io.scer.pocketmine"
-        minSdkVersion 19
-        targetSdkVersion 29
-        versionCode 230
-        versionName "2.3.0"
+        minSdkVersion 21
+        targetSdkVersion 34
+        versionCode 240
+        versionName "2.4.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled true
         ndk {
@@ -25,28 +24,31 @@ android {
             minifyEnabled false
         }
     }
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '34.0.0'
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+    kotlinOptions {
+        jvmTarget = '1.8'
+    }
 }
 
 dependencies {
-    def support_library_version = '1.1.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:1.1.0"
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
-    implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'
-    implementation "com.google.android.material:material:$support_library_version"
+    implementation "androidx.appcompat:appcompat:1.6.1"
+    implementation 'io.reactivex.rxjava3:rxjava:3.1.6'
+    implementation 'io.reactivex.rxjava3:rxkotlin:3.0.1'
+    implementation "com.google.android.material:material:1.10.0"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
-    implementation 'com.github.AppIntro:appintro:6.0.0-alpha1'
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-
-    implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
-    implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
-    testImplementation 'junit:junit:4.12'
-    androidTestImplementation 'androidx.test:runner:1.2.0'
-    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
+    implementation 'com.github.AppIntro:appintro:6.3.1'
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+    implementation "androidx.navigation:navigation-fragment-ktx:2.7.4"
+    implementation "androidx.navigation:navigation-ui-ktx:2.7.4"
+    implementation 'androidx.work:work-runtime-ktx:2.8.1'
+    
+    testImplementation 'junit:junit:4.13.2'
+    androidTestImplementation 'androidx.test:runner:1.5.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.5.1'
     implementation project(path: ':server')
-}
-repositories {
-    mavenCentral()
-    maven { url 'https://jitpack.io' }
 }
