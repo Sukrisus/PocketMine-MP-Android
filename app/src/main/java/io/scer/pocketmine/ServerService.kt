@@ -13,7 +13,7 @@ import io.scer.pocketmine.server.StopEvent
 class ServerService : IntentService("pocketmine_intent_service") {
     private val notificationId = 1
     private val stopIntentAction = "stop"
-    override fun onHandleIntent(intent: Intent?) {}
+    // Handled below with PHAR pre-check
 
     private val notificationPendingIntent: PendingIntent get() =
         PendingIntent.getActivity(
@@ -49,14 +49,33 @@ class ServerService : IntentService("pocketmine_intent_service") {
                 .build()
 
         startForeground(notificationId, notification)
-
-        Server.getInstance().run()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent !== null && intent.action === stopIntentAction) Server.getInstance().kill()
 
         return Service.START_NOT_STICKY
+    }
+
+    override fun onHandleIntent(intent: Intent?) {
+        // Ensure PHAR exists before starting the server
+        val server = Server.getInstance()
+        val pharFile = server.files.phar
+        if (!pharFile.exists()) {
+            try {
+                val url = java.net.URL("https://github.com/pmmp/PocketMine-MP/releases/download/5.33.1/PocketMine-MP.phar")
+                url.openStream().use { input ->
+                    java.io.FileOutputStream(pharFile).use { output ->
+                        input.copyTo(output)
+                    }
+                }
+            } catch (_: Exception) {
+                // ServerFragment listens and shows toast via ErrorEvent
+                ServerBus.publish(io.scer.pocketmine.server.ErrorEvent(null, io.scer.pocketmine.server.Errors.PHAR_NOT_EXIST))
+                return
+            }
+        }
+        server.run()
     }
 
     override fun onDestroy() {
