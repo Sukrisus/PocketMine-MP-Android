@@ -69,7 +69,9 @@ class Server(val files: Files) {
             ServerBus.publish(ErrorEvent(null, Errors.PHAR_NOT_EXIST))
         }
         val binary = File(files.appDirectory.toString() + "/php")
-        binary.setExecutable(true, true)
+        try {
+            binary.setExecutable(true, true)
+        } catch (ignored: Exception) {}
         val builder = ProcessBuilder(
                 files.php.toString(), "-c",
                 files.settingsFile.toString(),
@@ -122,7 +124,12 @@ class Server(val files: Files) {
             }.start()
         } catch (e: Exception) {
             e.printStackTrace()
-            ServerBus.publish(ErrorEvent(e.message.toString(), Errors.UNKNOWN))
+            val message = e.message?.toString() ?: "unknown"
+            if (message.contains("Permission denied") || message.contains("No such file")) {
+                ServerBus.publish(ErrorEvent(message, Errors.PHAR_NOT_EXIST))
+            } else {
+                ServerBus.publish(ErrorEvent(message, Errors.UNKNOWN))
+            }
             kill()
         }
     }

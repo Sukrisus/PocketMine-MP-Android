@@ -67,11 +67,13 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
 
         try {
             val file = File(Server.getInstance().files.appDirectory.toString() + "/php")
-            if (file.exists()) {
-                file.delete()
+            if (!file.exists()) {
+                val targetFile = copyAsset("php")
+                targetFile.setExecutable(true, true)
+            } else {
+                // Ensure executable bit on upgrade
+                file.setExecutable(true, true)
             }
-            val targetFile = copyAsset("php")
-            targetFile.setExecutable(true, true)
         } catch (e: Exception) {
             e.printStackTrace()
             Log.e( "php error", "exception")
@@ -216,18 +218,16 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
     private fun downloadPMBuild(channel: String) {
         try {
             val json = assemblies?.get(channel)
-            if (json != null) {
-                val url = when {
+            val url = if (json != null) {
+                when {
                     json.has("download_url") -> json.getString("download_url")
                     json.has("base_version") -> "https://github.com/pmmp/PocketMine-MP/releases/download/${json.getString("base_version")}/PocketMine-MP.phar"
                     else -> "https://github.com/pmmp/PocketMine-MP/releases/latest/download/PocketMine-MP.phar"
                 }
-                downloadFile(url, Server.getInstance().files.phar)
             } else {
-                // Assemblies missing for the selected channel, use fallback
-                val fallbackUrl = "https://github.com/pmmp/PocketMine-MP/releases/latest/download/PocketMine-MP.phar"
-                downloadFile(fallbackUrl, Server.getInstance().files.phar)
+                "https://github.com/pmmp/PocketMine-MP/releases/latest/download/PocketMine-MP.phar"
             }
+            downloadFile(url, Server.getInstance().files.phar)
         } catch (e: Exception) {
             Snackbar.make(content, R.string.download_error, Snackbar.LENGTH_LONG).show()
             e.printStackTrace()
