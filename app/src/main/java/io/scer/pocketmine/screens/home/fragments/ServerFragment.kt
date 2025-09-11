@@ -29,8 +29,31 @@ class ServerFragment : BaseFragment() {
         toggleButtons(isStarted)
 
         start.setOnClickListener {
-            service = Intent(activity, ServerService::class.java)
-            ContextCompat.startForegroundService(requireContext(), service!!)
+            if (!Server.getInstance().isInstalled) {
+                Snackbar.make(requireView(), R.string.download_phar, Snackbar.LENGTH_SHORT).show()
+                Thread {
+                    try {
+                        val url = java.net.URL("https://github.com/pmmp/PocketMine-MP/releases/download/5.33.1/PocketMine-MP.phar")
+                        url.openStream().use { input ->
+                            java.io.FileOutputStream(Server.getInstance().files.phar).use { output ->
+                                input.copyTo(output)
+                            }
+                        }
+                        requireActivity().runOnUiThread {
+                            Snackbar.make(requireView(), R.string.download, Snackbar.LENGTH_SHORT).show()
+                            service = Intent(activity, ServerService::class.java)
+                            ContextCompat.startForegroundService(requireContext(), service!!)
+                        }
+                    } catch (e: Exception) {
+                        requireActivity().runOnUiThread {
+                            Snackbar.make(requireView(), R.string.download_error, Snackbar.LENGTH_LONG).show()
+                        }
+                    }
+                }.start()
+            } else {
+                service = Intent(activity, ServerService::class.java)
+                ContextCompat.startForegroundService(requireContext(), service!!)
+            }
         }
 
         stop.setOnClickListener {
