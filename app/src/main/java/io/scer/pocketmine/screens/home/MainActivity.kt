@@ -90,8 +90,19 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
                 e.printStackTrace()
             }
         }
-        if (assemblies != null && !Server.getInstance().isInstalled) {
-            downloadPMBuild("stable")
+        val hasAssemblies = assemblies?.isNotEmpty() == true && assemblies!!.containsKey("stable")
+        if (!Server.getInstance().isInstalled) {
+            if (hasAssemblies) {
+                downloadPMBuild("stable")
+            } else {
+                // Fallback to GitHub latest stable if API failed
+                try {
+                    val fallbackUrl = "https://github.com/pmmp/PocketMine-MP/releases/latest/download/PocketMine-MP.phar"
+                    downloadFile(fallbackUrl, Server.getInstance().files.phar)
+                } catch (e: Exception) {
+                    Snackbar.make(content, R.string.assemblies_error, Snackbar.LENGTH_LONG).show()
+                }
+            }
         }
     }
 
@@ -204,9 +215,21 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
 
     private fun downloadPMBuild(channel: String) {
         try {
-            downloadFile(assemblies!![channel]!!.getString("download_url"), Server.getInstance().files.phar)
+            val json = assemblies?.get(channel)
+            if (json != null) {
+                val url = when {
+                    json.has("download_url") -> json.getString("download_url")
+                    json.has("base_version") -> "https://github.com/pmmp/PocketMine-MP/releases/download/${json.getString("base_version")}/PocketMine-MP.phar"
+                    else -> "https://github.com/pmmp/PocketMine-MP/releases/latest/download/PocketMine-MP.phar"
+                }
+                downloadFile(url, Server.getInstance().files.phar)
+            } else {
+                // Assemblies missing for the selected channel, use fallback
+                val fallbackUrl = "https://github.com/pmmp/PocketMine-MP/releases/latest/download/PocketMine-MP.phar"
+                downloadFile(fallbackUrl, Server.getInstance().files.phar)
+            }
         } catch (e: Exception) {
-            Snackbar.make(content, R.string.assemblies_error, Snackbar.LENGTH_LONG).show()
+            Snackbar.make(content, R.string.download_error, Snackbar.LENGTH_LONG).show()
             e.printStackTrace()
         }
     }
