@@ -8,7 +8,9 @@ import android.text.format.Formatter
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.core.content.ContextCompat
+import com.github.mikephil.charting.charts.LineChart
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -17,18 +19,27 @@ import com.google.android.material.snackbar.Snackbar
 import io.scer.pocketmine.R
 import io.scer.pocketmine.ServerService
 import io.scer.pocketmine.server.*
-import kotlinx.android.synthetic.main.fragment_server.*
 
 class ServerFragment : BaseFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_server, container, false)
+
+    private lateinit var startButton: View
+    private lateinit var stopButton: View
+    private lateinit var chartProcessor: LineChart
+    private lateinit var ipLabel: TextView
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         val isStarted = Server.getInstance().isRunning
         toggleButtons(isStarted)
 
-        start.setOnClickListener {
+        startButton = view.findViewById(R.id.start)
+        stopButton = view.findViewById(R.id.stop)
+        chartProcessor = view.findViewById(R.id.chart_processor)
+        ipLabel = view.findViewById(R.id.ip)
+
+        startButton.setOnClickListener {
             if (!Server.getInstance().isInstalled) {
                 Snackbar.make(requireView(), R.string.download_phar, Snackbar.LENGTH_SHORT).show()
                 Thread {
@@ -56,7 +67,7 @@ class ServerFragment : BaseFragment() {
             }
         }
 
-        stop.setOnClickListener {
+        stopButton.setOnClickListener {
             Server.getInstance().sendCommand("stop")
         }
 
@@ -66,23 +77,23 @@ class ServerFragment : BaseFragment() {
         dataSet.color = ContextCompat.getColor(requireContext(), R.color.secondaryColor)
         dataSet.setDrawCircles(false)
         lineData = LineData(dataSet)
-        chart_processor.description.isEnabled = false
-        chart_processor.data = lineData
-        chart_processor.setScaleEnabled(false)
-        chart_processor.setTouchEnabled(false)
-        chart_processor.isDragEnabled = false
-        chart_processor.setDrawBorders(true)
-        chart_processor.legend.isEnabled = false
-        val leftAxis = chart_processor.axisLeft
+        chartProcessor.description.isEnabled = false
+        chartProcessor.data = lineData
+        chartProcessor.setScaleEnabled(false)
+        chartProcessor.setTouchEnabled(false)
+        chartProcessor.isDragEnabled = false
+        chartProcessor.setDrawBorders(true)
+        chartProcessor.legend.isEnabled = false
+        val leftAxis = chartProcessor.axisLeft
         leftAxis.axisMaximum = 100f
         leftAxis.valueFormatter = PercentFormatter()
         leftAxis.setDrawGridLines(false)
-        val rightAxis = chart_processor.axisRight
+        val rightAxis = chartProcessor.axisRight
         rightAxis.isEnabled = false
-        val xAxis = chart_processor.xAxis
+        val xAxis = chartProcessor.xAxis
         xAxis.isEnabled = false
 
-        ip.text = getIpAddress()
+        ipLabel.text = getIpAddress()
     }
 
     @Suppress("DEPRECATION")
@@ -129,14 +140,10 @@ class ServerFragment : BaseFragment() {
         if (activity == null || !it.state.containsKey("Load")) return@subscribe
 
         requireActivity().runOnUiThread {
-            if (chart_processor == null) return@runOnUiThread
-
             val processor = it.state.getValue("Load").replace("%", "").toFloat()
-            println(it)
 
             if (lastIndex >= 5) {
                 dataSet.removeFirst()
-                chart_processor.xAxis.axisMinimum = lastIndex.toFloat()
             }
 
             if (lineData.entryCount > 0) {
@@ -147,17 +154,17 @@ class ServerFragment : BaseFragment() {
             }
 
             dataSet.notifyDataSetChanged()
-            chart_processor.notifyDataSetChanged()
-            chart_processor.invalidate()
+            chartProcessor.notifyDataSetChanged()
+            chartProcessor.invalidate()
         }
     }, ::handleError)
 
     private fun toggleButtons(isStarted: Boolean) {
-        if (start.isEnabled != !isStarted) {
-            start.isEnabled = !isStarted
+        if (startButton.isEnabled != !isStarted) {
+            startButton.isEnabled = !isStarted
         }
-        if (stop.isEnabled != isStarted) {
-            stop.isEnabled = isStarted
+        if (stopButton.isEnabled != isStarted) {
+            stopButton.isEnabled = isStarted
         }
     }
 

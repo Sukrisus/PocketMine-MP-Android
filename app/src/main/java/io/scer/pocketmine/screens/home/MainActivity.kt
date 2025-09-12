@@ -22,7 +22,6 @@ import io.scer.pocketmine.R
 import io.scer.pocketmine.server.Server
 import io.scer.pocketmine.utils.AsyncRequest
 import io.scer.pocketmine.utils.saveTo
-import kotlinx.android.synthetic.main.activity_main.*
 import org.json.JSONException
 import org.json.JSONObject
 import java.io.File
@@ -38,10 +37,11 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        val host: NavHostFragment = fragment as NavHostFragment
+        val host: NavHostFragment = supportFragmentManager.findFragmentById(R.id.fragment) as NavHostFragment
 
         val navController = host.navController
-        navigation.setupWithNavController(navController)
+        val bottomNav = findViewById<com.google.android.material.navigation.NavigationBarView>(R.id.navigation)
+        bottomNav.setupWithNavController(navController)
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
             init()
@@ -102,6 +102,7 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
                     val fallbackUrl = "https://github.com/pmmp/PocketMine-MP/releases/latest/download/PocketMine-MP.phar"
                     downloadFile(fallbackUrl, Server.getInstance().files.phar)
                 } catch (e: Exception) {
+                    val content = findViewById<View>(R.id.content)
                     Snackbar.make(content, R.string.assemblies_error, Snackbar.LENGTH_LONG).show()
                 }
             }
@@ -135,6 +136,7 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
             try {
                 URL(url).saveTo(file)
             } catch (_: Exception) {
+                val content = findViewById<View>(R.id.content)
                 runOnUiThread {
                     Snackbar.make(content, R.string.download_error, Snackbar.LENGTH_LONG).show()
                 }
@@ -175,6 +177,7 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
     }
 
     private fun downloadPM() {
+        val content = findViewById<View>(R.id.content)
         if (assemblies == null) {
             Snackbar.make(content, R.string.assemblies_error, Snackbar.LENGTH_LONG).show()
             return
@@ -216,6 +219,7 @@ class MainActivity : AppCompatActivity(), Handler.Callback {
     }
 
     private fun downloadPMBuild(channel: String) {
+        val content = findViewById<View>(R.id.content)
         try {
             val json = assemblies?.get(channel)
             val url = if (json != null) {

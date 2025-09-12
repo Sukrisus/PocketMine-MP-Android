@@ -3,13 +3,13 @@ package io.scer.pocketmine.screens.home.fragments
 import android.os.Bundle
 import android.view.*
 import android.widget.ScrollView
+import android.widget.TextView
 import com.google.android.material.snackbar.Snackbar
 import io.reactivex.disposables.Disposable
 import io.scer.pocketmine.R
 import io.scer.pocketmine.server.Server
 import io.scer.pocketmine.server.ServerBus
 import io.scer.pocketmine.server.StopEvent
-import kotlinx.android.synthetic.main.fragment_console.*
 import java.util.*
 import kotlin.concurrent.schedule
 
@@ -18,12 +18,21 @@ class ConsoleFragment : BaseFragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
             inflater.inflate(R.layout.fragment_console, container, false)
 
+    private lateinit var labelLog: TextView
+    private lateinit var editCommand: TextView
+    private lateinit var scroll: ScrollView
+    private lateinit var commandRoot: View
+    private lateinit var serverDisabled: View
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setHasOptionsMenu(true)
-        send.setOnClickListener {
-            sendCommand()
-        }
+        labelLog = view.findViewById(R.id.labelLog)
+        editCommand = view.findViewById(R.id.editCommand)
+        scroll = view.findViewById(R.id.scroll)
+        commandRoot = view.findViewById(R.id.command_root)
+        serverDisabled = view.findViewById(R.id.server_disabled)
+        view.findViewById<View>(R.id.send).setOnClickListener { sendCommand() }
 
         editCommand.setOnKeyListener(View.OnKeyListener { _, keyCode, _ ->
             if (keyCode == KeyEvent.KEYCODE_ENTER) {
@@ -56,8 +65,8 @@ class ConsoleFragment : BaseFragment() {
     }
 
     private fun toggleCommandLine(enable: Boolean) {
-        command_root.visibility = if (enable) View.VISIBLE else View.GONE
-        server_disabled.visibility = if (enable) View.GONE else View.VISIBLE
+        commandRoot.visibility = if (enable) View.VISIBLE else View.GONE
+        serverDisabled.visibility = if (enable) View.GONE else View.VISIBLE
     }
 
     private val stopObserver = ServerBus.listen(StopEvent::class.java).subscribe({
@@ -81,7 +90,7 @@ class ConsoleFragment : BaseFragment() {
             Server.getInstance().sendCommand(editCommand.text.toString())
         }.run()
 
-        editCommand.setText("")
+        editCommand.text = ""
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

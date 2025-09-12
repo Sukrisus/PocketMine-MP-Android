@@ -2,9 +2,9 @@ package io.scer.pocketmine.screens
 
 import android.os.Bundle
 import android.text.method.LinkMovementMethod
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import io.scer.pocketmine.R
-import kotlinx.android.synthetic.main.activity_launcher.*
 import android.content.Intent
 import io.scer.pocketmine.screens.home.MainActivity
 
@@ -12,6 +12,7 @@ class LauncherActivity: AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_launcher)
+        val text = findViewById<TextView>(R.id.text)
         text.movementMethod = LinkMovementMethod.getInstance()
 
         val arch = System.getProperty("os.arch") ?: "7"
