@@ -27,7 +27,7 @@
         </LinearLayout>
     </ScrollView>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/controls"
         android:layout_width="match_parent"
@@ -77,5 +77,5 @@
                 android:background="?android:attr/selectableItemBackground"
                 android:padding="16dp"/>
         </LinearLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </RelativeLayout>

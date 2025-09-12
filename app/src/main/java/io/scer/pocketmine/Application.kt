@@ -5,6 +5,7 @@ import android.app.NotificationChannel
 import android.os.Build
 import android.app.Application
 import androidx.annotation.RequiresApi
+import com.google.android.material.color.DynamicColors
 
 const val CHANNEL_ID = "pocketmine_service_channel"
 
@@ -15,6 +16,9 @@ class App : Application() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             createNotificationChannel()
         }
+
+        // Apply Material 3 dynamic color if supported
+        try { DynamicColors.applyToActivitiesIfAvailable(this) } catch (_: Exception) {}
     }
 
     @RequiresApi(Build.VERSION_CODES.O)

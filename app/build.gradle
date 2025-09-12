@@ -6,8 +6,8 @@ android {
     compileSdkVersion 29
     defaultConfig {
         applicationId "io.scer.pocketmine"
-        minSdkVersion 19
-        targetSdkVersion 29
+        minSdkVersion 21
+        targetSdkVersion 34
         versionCode 230
         versionName "2.3.0"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -25,16 +25,16 @@ android {
             minifyEnabled false
         }
     }
-    buildToolsVersion '29.0.2'
+    buildToolsVersion '33.0.2'
 }
 
 dependencies {
-    def support_library_version = '1.1.0'
     implementation fileTree(dir: 'libs', include: ['*.jar'])
-    implementation "androidx.appcompat:appcompat:1.1.0"
+    implementation "androidx.core:core-ktx:1.13.1"
+    implementation "androidx.appcompat:appcompat:1.7.0"
+    implementation "com.google.android.material:material:1.12.0"
     implementation 'io.reactivex.rxjava2:rxjava:2.2.10'
     implementation 'io.reactivex.rxjava2:rxkotlin:2.4.0'
-    implementation "com.google.android.material:material:$support_library_version"
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
     implementation 'com.github.AppIntro:appintro:6.0.0-alpha1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
