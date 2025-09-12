@@ -58,9 +58,43 @@ class ServerService : IntentService("pocketmine_intent_service") {
     }
 
     override fun onHandleIntent(intent: Intent?) {
-        // Ensure PHAR exists before starting the server
+        // Ensure directories, php.ini, PHP binary, and PHAR exist before starting the server
         val server = Server.getInstance()
+        val dataDir = server.files.dataDirectory
         val pharFile = server.files.phar
+        val phpBinary = server.files.php
+        val phpIni = server.files.settingsFile
+
+        try {
+            dataDir.mkdirs()
+            java.io.File(dataDir, "tmp").mkdirs()
+        } catch (_: Exception) {}
+
+        if (!phpIni.exists()) {
+            try {
+                phpIni.createNewFile()
+                phpIni.writeText("date.timezone=UTC\nshort_open_tag=0\nasp_tags=0\nphar.readonly=0\nphar.require_hash=1\nigbinary.compact_strings=0\nzend.assertions=-1\nerror_reporting=-1\ndisplay_errors=1\ndisplay_startup_errors=1\n")
+            } catch (e: Exception) {
+                android.util.Log.e("ServerService", "Failed to create php.ini", e)
+            }
+        }
+
+        if (!phpBinary.exists()) {
+            try {
+                // Copy PHP binary from assets
+                val input = applicationContext.assets.open("php")
+                val output = java.io.FileOutputStream(phpBinary)
+                input.copyTo(output)
+                input.close()
+                output.close()
+                phpBinary.setExecutable(true, true)
+            } catch (e: Exception) {
+                android.util.Log.e("ServerService", "Failed to prepare PHP binary", e)
+            }
+        } else {
+            try { phpBinary.setExecutable(true, true) } catch (_: Exception) {}
+        }
+
         if (!pharFile.exists()) {
             try {
                 android.util.Log.d("ServerService", "Downloading PocketMine-MP.phar...")
