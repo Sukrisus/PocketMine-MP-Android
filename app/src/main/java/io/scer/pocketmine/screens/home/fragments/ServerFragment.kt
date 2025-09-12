@@ -56,8 +56,6 @@ class ServerFragment : BaseFragment() {
             } else {
                 service = Intent(activity, ServerService::class.java)
                 ContextCompat.startForegroundService(requireContext(), service!!)
-                // Open console to show logs
-                try { findNavController().navigate(R.id.console_dest) } catch (_: Exception) {}
             }
         }
 

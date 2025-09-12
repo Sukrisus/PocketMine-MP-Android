@@ -116,6 +116,12 @@ class ServerService : IntentService("pocketmine_intent_service") {
         }
         android.util.Log.d("ServerService", "Starting server...")
         server.run()
+        // Keep the IntentService alive while the server is running so it doesn't auto-stop
+        try {
+            while (Server.getInstance().isRunning) {
+                Thread.sleep(1000)
+            }
+        } catch (_: Exception) {}
     }
 
     override fun onDestroy() {
