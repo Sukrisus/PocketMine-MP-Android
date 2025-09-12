@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.content.ContextCompat
+import androidx.navigation.fragment.findNavController
 import com.github.mikephil.charting.data.Entry
 import com.github.mikephil.charting.data.LineData
 import com.github.mikephil.charting.data.LineDataSet
@@ -43,6 +44,8 @@ class ServerFragment : BaseFragment() {
                             Snackbar.make(requireView(), R.string.download, Snackbar.LENGTH_SHORT).show()
                             service = Intent(activity, ServerService::class.java)
                             ContextCompat.startForegroundService(requireContext(), service!!)
+                            // Open console to show logs
+                            try { findNavController().navigate(R.id.console_dest) } catch (_: Exception) {}
                         }
                     } catch (e: Exception) {
                         requireActivity().runOnUiThread {
@@ -53,6 +56,8 @@ class ServerFragment : BaseFragment() {
             } else {
                 service = Intent(activity, ServerService::class.java)
                 ContextCompat.startForegroundService(requireContext(), service!!)
+                // Open console to show logs
+                try { findNavController().navigate(R.id.console_dest) } catch (_: Exception) {}
             }
         }
 
