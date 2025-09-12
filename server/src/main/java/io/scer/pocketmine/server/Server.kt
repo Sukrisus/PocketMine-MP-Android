@@ -67,6 +67,7 @@ class Server(val files: Files) {
     fun run() {
         if (!isInstalled) {
             ServerBus.publish(ErrorEvent(null, Errors.PHAR_NOT_EXIST))
+            return
         }
         val binary = File(files.appDirectory.toString() + "/php")
         try {
@@ -85,6 +86,7 @@ class Server(val files: Files) {
                 .directory(files.dataDirectory)
         builder.environment()["TMPDIR"] = files.dataDirectory.toString() + "/tmp"
         try {
+            ServerBus.Log.message("Starting PocketMine server...\n")
             process = builder.start()
             stdout = process!!.inputStream
             stdin = process!!.outputStream
@@ -124,11 +126,12 @@ class Server(val files: Files) {
             }.start()
         } catch (e: Exception) {
             e.printStackTrace()
+            ServerBus.Log.message("Failed to start server: ${e.message}\n")
             val message = e.message?.toString() ?: "unknown"
             if (message.contains("Permission denied") || message.contains("No such file")) {
-                ServerBus.publish(ErrorEvent(message, Errors.PHAR_NOT_EXIST))
+                ServerBus.publish(ErrorEvent("PHP binary not found or permission denied: $message", Errors.PHAR_NOT_EXIST))
             } else {
-                ServerBus.publish(ErrorEvent(message, Errors.UNKNOWN))
+                ServerBus.publish(ErrorEvent("Server start failed: $message", Errors.UNKNOWN))
             }
             kill()
         }

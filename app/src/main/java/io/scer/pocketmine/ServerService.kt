@@ -63,18 +63,24 @@ class ServerService : IntentService("pocketmine_intent_service") {
         val pharFile = server.files.phar
         if (!pharFile.exists()) {
             try {
+                android.util.Log.d("ServerService", "Downloading PocketMine-MP.phar...")
                 val url = java.net.URL("https://github.com/pmmp/PocketMine-MP/releases/download/5.33.1/PocketMine-MP.phar")
                 url.openStream().use { input ->
                     java.io.FileOutputStream(pharFile).use { output ->
                         input.copyTo(output)
                     }
                 }
-            } catch (_: Exception) {
+                android.util.Log.d("ServerService", "PHAR downloaded successfully")
+            } catch (e: Exception) {
+                android.util.Log.e("ServerService", "Failed to download PHAR", e)
                 // ServerFragment listens and shows toast via ErrorEvent
                 ServerBus.publish(io.scer.pocketmine.server.ErrorEvent(null, io.scer.pocketmine.server.Errors.PHAR_NOT_EXIST))
                 return
             }
+        } else {
+            android.util.Log.d("ServerService", "PHAR already exists")
         }
+        android.util.Log.d("ServerService", "Starting server...")
         server.run()
     }
 
